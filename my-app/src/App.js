@@ -92,12 +92,10 @@ function App() {
       contract_hash_str: new CLString("contract-152935c4378bbb59f4f9048a281d41306571f2f5fedc61f4b19aa00c0793418d")
     });
     
-    let lock_cspr_moduleBytes 
-    await fetch('lock_cspr.wasm').then(response =>
-      response.arrayBuffer()
-    ).then(bytes =>
-      lock_cspr_moduleBytes =  new Uint8Array(bytes)
-    )
+    const response = await fetch('lock_cspr.wasm')
+    const bytes = await response.arrayBuffer()
+    const lock_cspr_moduleBytes = new Uint8Array(bytes)
+
     
     const session = DeployUtil.ExecutableDeployItem.newModuleBytes(
       lock_cspr_moduleBytes,
