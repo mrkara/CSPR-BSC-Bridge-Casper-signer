@@ -18,13 +18,9 @@ import {
 
 function App() {
   const [signerConnected, setSignerConnected] = useState(false);
-  const [signerLocked, setSignerLocked] = useState(true);
+
   const [activeKey, setActiveKey] = useState("");
-  const [showAlert, setShowAlert] = useState(false);
-  const [currentNotification, setCurrentNotification] = useState({
-    text: "",
-    severity: "",
-  });
+
   const [receipient_publickey, setReceipient_publickey] = useState("")
   const [amountUnlock, setAmountUnlock] = useState("")
   const [amountLock, setAmountLock] = useState("")
@@ -129,8 +125,7 @@ function App() {
     try {
       key = await Signer.getActivePublicKey();
     } catch (err) {
-      setCurrentNotification({ text: err.message, severity: "error" });
-      setShowAlert(true);
+      console.log(err)
       return;
     }
 
@@ -144,8 +139,7 @@ function App() {
     try {
       signedDeployJSON = await Signer.sign(deployJSON, key, key);
     } catch (err) {
-      setCurrentNotification({ text: err.message, severity: "error" });
-      setShowAlert(true);
+      console.log(err)
       return;
     }
   
@@ -170,8 +164,7 @@ function App() {
     try {
       key = await Signer.getActivePublicKey();
     } catch (err) {
-      setCurrentNotification({ text: err.message, severity: "error" });
-      setShowAlert(true);
+      console.log(err)
       return;
     }
 
@@ -185,8 +178,7 @@ function App() {
     try {
       signedDeployJSON = await Signer.sign(deployJSON, key, key);
     } catch (err) {
-      setCurrentNotification({ text: err.message, severity: "error" });
-      setShowAlert(true);
+      console.log(err)
       return;
     }
   
@@ -204,9 +196,7 @@ function App() {
         const connected = await checkConnection();
         setSignerConnected(connected);
       } catch (err) {
-        console.log(err);
-        setCurrentNotification({ text: err.message });
-        setShowAlert(true);
+        console.log(err)
       }
     }, 100);
 
@@ -216,52 +206,43 @@ function App() {
     tmpfunc();
 
     window.addEventListener("signer:connected", (msg) => {
-      setSignerLocked(!msg.detail.isUnlocked);
+ 
       setSignerConnected(true);
       setActiveKey(msg.detail.activeKey);
-      setCurrentNotification({
-        text: "Connected to Signer!",
-        severity: "success",
-      });
-      setShowAlert(true);
+      
+ 
     });
     window.addEventListener("signer:disconnected", (msg) => {
-      setSignerLocked(!msg.detail.isUnlocked);
+    
       setSignerConnected(false);
       setActiveKey(msg.detail.activeKey);
-      setCurrentNotification({
-        text: "Disconnected from Signer",
-        severity: "info",
-      });
-      setShowAlert(true);
+   
+
     });
     window.addEventListener("signer:tabUpdated", (msg) => {
-      setSignerLocked(!msg.detail.isUnlocked);
+
       setSignerConnected(msg.detail.isConnected);
       setActiveKey(msg.detail.activeKey);
     });
     window.addEventListener("signer:activeKeyChanged", (msg) => {
       setActiveKey(msg.detail.activeKey);
-      setCurrentNotification({
-        text: "Active key changed",
-        severity: "warning",
-      });
-      setShowAlert(true);
+    
+ 
     });
     window.addEventListener("signer:locked", (msg) => {
-      setSignerLocked(!msg.detail.isUnlocked);
-      setCurrentNotification({ text: "Signer has locked", severity: "info" });
-      setShowAlert(true);
+ 
+ 
+
       setActiveKey(msg.detail.activeKey);
     });
     window.addEventListener("signer:unlocked", (msg) => {
-      setSignerLocked(!msg.detail.isUnlocked);
+
       setSignerConnected(msg.detail.isConnected);
       setActiveKey(msg.detail.activeKey);
     });
     window.addEventListener("signer:initialState", (msg) => {
       console.log("Initial State: ", msg.detail);
-      setSignerLocked(!msg.detail.isUnlocked);
+ 
       setSignerConnected(msg.detail.isConnected);
       setActiveKey(msg.detail.activeKe);
     });
