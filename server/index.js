@@ -23,35 +23,39 @@ const LOCKEventParser = (
     const { transforms } =
       value.body.DeployProcessed.execution_result.Success.effect;
 
-        const LOCKEvents = transforms.reduce((acc, val) => {
+    const { deploy_hash } = value.body.DeployProcessed;
+
+    const LOCKEvents = transforms.reduce((acc, val) => {
+      if (
+        val.transform.hasOwnProperty("WriteCLValue") &&
+        typeof val.transform.WriteCLValue.parsed === "object" &&
+        val.transform.WriteCLValue.parsed !== null
+      ) {
+        const maybeCLValue = CLValueParsers.fromJSON(
+          val.transform.WriteCLValue
+        );
+        const clValue = maybeCLValue.unwrap();
+        if (clValue && clValue instanceof CLMap) {
+          const hash = clValue.get(
+            CLValueBuilder.string("lock_unlock_cspr_contract")
+          );
+          const event = clValue.get(CLValueBuilder.string("event_type"));
           if (
-            val.transform.hasOwnProperty("WriteCLValue") &&
-            typeof val.transform.WriteCLValue.parsed === "object" &&
-            val.transform.WriteCLValue.parsed !== null
+            hash &&
+            // NOTE: Calling toLowerCase() because current JS-SDK doesn't support checksumed hashes and returns all lower case value
+            // Remove it after updating SDK
+            hash.value().slice(9) === contractHash.slice(5).toLowerCase() &&
+            event &&
+            eventNames.includes(event.value())
           ) {
-            const maybeCLValue = CLValueParsers.fromJSON(
-              val.transform.WriteCLValue
-            );
-            const clValue = maybeCLValue.unwrap();
-            if (clValue && clValue instanceof CLMap) {
-              const hash = clValue.get(
-                CLValueBuilder.string("lock_unlock_cspr_contract")
-              );
-              const event = clValue.get(CLValueBuilder.string("event_type"));
-              if (
-                hash &&
-                // NOTE: Calling toLowerCase() because current JS-SDK doesn't support checksumed hashes and returns all lower case value
-                // Remove it after updating SDK
-                hash.value().slice(9) === contractHash.slice(5).toLowerCase() &&
-                event &&
-                eventNames.includes(event.value())
-              ) {
-                acc = [...acc, { name: event.value(), clValue }];
-              }
-            }
+            acc = [...acc, { name: event.value(), clValue }];
+            acc = [{ deploy_hash},...acc,];
           }
-          return acc;
-        }, []);
+        }
+      }
+      
+      return acc;
+    }, []);
 
     return { error: null, success: !!LOCKEvents.length, data: LOCKEvents };
   }

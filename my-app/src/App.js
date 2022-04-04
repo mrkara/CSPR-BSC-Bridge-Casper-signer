@@ -111,6 +111,10 @@ function App() {
       console.log("please input 3 arguments")
       return
     }
+
+    if (!activeKey) { 
+      return
+    }
     // 
     // check publickey format
     var regex1 = /^[0][1]/;
@@ -154,6 +158,9 @@ function App() {
     // check inputs are ready
     if (!bsc_recipient_address || !amountLock) { 
       console.log("please input 2 arguments")
+      return
+    }
+    if (!activeKey) { 
       return
     }
     // 
@@ -230,8 +237,6 @@ function App() {
  
     });
     window.addEventListener("signer:locked", (msg) => {
- 
- 
 
       setActiveKey(msg.detail.activeKey);
     });
